@@ -13,7 +13,7 @@ const AppContent: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="h-screen w-full flex items-center justify-center bg-slate-50">
+      <div className="h-screen w-full flex items-center justify-center bg-slate-50 dark:bg-slate-950">
         <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
       </div>
     );
@@ -37,7 +37,7 @@ const AppContent: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen w-full bg-slate-50 text-slate-900">
+    <div className="flex h-screen w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors">
       <Sidebar currentView={currentView} setView={setCurrentView} />
       
       <main className="flex-1 flex flex-col h-full ml-20 lg:ml-64 transition-all duration-300 w-full relative overflow-hidden">

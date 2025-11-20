@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import { CRMState, Lead, LeadStatus } from '../types';
 import confetti from 'canvas-confetti';
 import { supabase } from '../lib/supabase';
@@ -11,18 +10,39 @@ export const CRMProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [leads, setLeads] = useState<Lead[]>([]);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('theme') as 'light' | 'dark' || 'light';
+    }
+    return 'light';
+  });
 
-  // Initialize Auth
+  // Initialize Theme
+  useEffect(() => {
+    const root = window.document.documentElement;
+    root.classList.remove('light', 'dark');
+    root.classList.add(theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
+  };
+
+  // Initialize Session
   useEffect(() => {
     if (!supabase) {
       setLoading(false);
       return;
     }
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const initSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user ?? null);
       setLoading(false);
-    });
+    };
+
+    initSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
@@ -32,89 +52,99 @@ export const CRMProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     return () => subscription.unsubscribe();
   }, []);
 
-  // Fetch Leads from Supabase
-  const fetchLeads = async () => {
-    if (!user || !supabase) return;
-    
-    try {
+  // Fetch Leads
+  useEffect(() => {
+    if (!user || !supabase) {
+      setLeads([]);
+      return;
+    }
+
+    const fetchLeads = async () => {
       const { data, error } = await supabase
         .from('leads')
         .select('*')
-        .order('created_at', { ascending: true });
+        .order('created_at', { ascending: false });
 
-      if (error) throw error;
-
-      if (data) {
-        // Map Supabase snake_case to App camelCase
-        const mappedLeads: Lead[] = data.map((item: any) => ({
+      if (error) {
+        console.error('Error fetching leads:', error);
+      } else if (data) {
+        const mappedLeads: Lead[] = data.map((item) => ({
           id: item.id,
           name: item.name,
-          email: item.email || '',
+          email: item.email,
           value: Number(item.value),
-          status: item.status as LeadStatus,
-          notes: item.notes || '',
+          status: item.status,
+          notes: item.notes,
           createdAt: item.created_at,
           lastUpdated: item.last_updated,
         }));
         setLeads(mappedLeads);
       }
-    } catch (error) {
-      console.error('Error fetching leads:', error);
-      setLeads([]);
-    }
-  };
+    };
 
-  // Load data when user changes
-  useEffect(() => {
-    if (user) {
-      fetchLeads();
-    } else {
-      setLeads([]);
-    }
+    fetchLeads();
   }, [user]);
 
   const addLead = async (leadData: Omit<Lead, 'id' | 'createdAt' | 'lastUpdated'>) => {
     if (!user || !supabase) return;
 
-    const newLeadId = uuidv4();
-    const timestamp = new Date().toISOString();
-    
-    // Optimistic Update
-    const optimisticLead: Lead = {
-      ...leadData,
-      id: newLeadId,
-      createdAt: timestamp,
-      lastUpdated: timestamp,
+    const newLeadPayload = {
+      user_id: user.id,
+      name: leadData.name,
+      email: leadData.email,
+      value: leadData.value,
+      status: leadData.status,
+      notes: leadData.notes,
     };
-    setLeads((prev) => [...prev, optimisticLead]);
 
-    try {
-      const { error } = await supabase.from('leads').insert([{
-        id: newLeadId,
-        user_id: user.id,
-        name: leadData.name,
-        email: leadData.email,
-        value: leadData.value,
-        status: leadData.status,
-        notes: leadData.notes,
-        created_at: timestamp,
-        last_updated: timestamp
-      }]);
+    const { data, error } = await supabase
+      .from('leads')
+      .insert(newLeadPayload)
+      .select()
+      .single();
 
-      if (error) throw error;
-    } catch (error) {
+    if (error) {
       console.error('Error adding lead:', error);
-      // Revert on error
-      setLeads((prev) => prev.filter(l => l.id !== newLeadId));
-      alert('Failed to save lead. Please try again.');
+      alert('Failed to add lead: ' + error.message);
+      return;
+    }
+
+    if (data) {
+      const mappedLead: Lead = {
+        id: data.id,
+        name: data.name,
+        email: data.email,
+        value: Number(data.value),
+        status: data.status,
+        notes: data.notes,
+        createdAt: data.created_at,
+        lastUpdated: data.last_updated,
+      };
+      setLeads((prev) => [mappedLead, ...prev]);
     }
   };
 
   const updateLead = async (id: string, updates: Partial<Lead>) => {
-    if (!user || !supabase) return;
+    if (!supabase) return;
 
-    // Optimistic Update
-    const oldLeads = [...leads];
+    // Prepare payload for Supabase (mapping back to snake_case columns if needed, though basic fields match)
+    const payload: any = { ...updates };
+    delete payload.id;
+    delete payload.createdAt;
+    delete payload.lastUpdated;
+    payload.last_updated = new Date().toISOString();
+
+    const { error } = await supabase
+      .from('leads')
+      .update(payload)
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error updating lead:', error);
+      alert('Failed to update lead');
+      return;
+    }
+
     setLeads((prev) =>
       prev.map((lead) =>
         lead.id === id
@@ -122,77 +152,60 @@ export const CRMProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           : lead
       )
     );
-
-    try {
-      const dbUpdates: any = {
-        last_updated: new Date().toISOString()
-      };
-      if (updates.name) dbUpdates.name = updates.name;
-      if (updates.email !== undefined) dbUpdates.email = updates.email;
-      if (updates.value !== undefined) dbUpdates.value = updates.value;
-      if (updates.status) dbUpdates.status = updates.status;
-      if (updates.notes !== undefined) dbUpdates.notes = updates.notes;
-
-      const { error } = await supabase
-        .from('leads')
-        .update(dbUpdates)
-        .eq('id', id)
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-    } catch (error) {
-      console.error('Error updating lead:', error);
-      setLeads(oldLeads);
-      alert('Failed to update lead.');
-    }
   };
 
   const moveLead = async (id: string, newStatus: LeadStatus) => {
-    if (!user || !supabase) return;
+    if (!supabase) return;
 
-    const leadToMove = leads.find(l => l.id === id);
-    if (!leadToMove) return;
+    // Optimistic update
+    setLeads((prev) =>
+      prev.map((lead) => (lead.id === id ? { ...lead, status: newStatus } : lead))
+    );
 
-    if (newStatus === 'WON' && leadToMove.status !== 'WON') {
+    if (newStatus === 'WON') {
       confetti({
         particleCount: 100,
         spread: 70,
         origin: { y: 0.6 },
+        colors: ['#4f46e5', '#10b981', '#f59e0b'],
       });
     }
 
-    await updateLead(id, { status: newStatus });
-  };
+    const { error } = await supabase
+      .from('leads')
+      .update({ status: newStatus, last_updated: new Date().toISOString() })
+      .eq('id', id);
 
-  const deleteLead = async (id: string) => {
-    if (!user || !supabase) return;
-
-    const oldLeads = [...leads];
-    setLeads((prev) => prev.filter((lead) => lead.id !== id));
-
-    try {
-      const { error } = await supabase
-        .from('leads')
-        .delete()
-        .eq('id', id)
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-    } catch (error) {
-      console.error('Error deleting lead:', error);
-      setLeads(oldLeads);
-      alert('Failed to delete lead.');
+    if (error) {
+      console.error('Error moving lead:', error);
+      // Revert if failed
+      const { data } = await supabase.from('leads').select('status').eq('id', id).single();
+      if (data) {
+         setLeads((prev) =>
+          prev.map((lead) => (lead.id === id ? { ...lead, status: data.status as LeadStatus } : lead))
+        );
+      }
     }
   };
 
+  const deleteLead = async (id: string) => {
+    if (!supabase) return;
+
+    const { error } = await supabase.from('leads').delete().eq('id', id);
+
+    if (error) {
+      console.error('Error deleting lead:', error);
+      alert('Failed to delete lead');
+      return;
+    }
+
+    setLeads((prev) => prev.filter((lead) => lead.id !== id));
+  };
+
   const importData = async (data: Lead[]) => {
-    if (!user || !supabase || !Array.isArray(data)) return;
+    if (!user || !supabase) return;
 
-    const confirm = window.confirm(`Importing ${data.length} leads. This will upload them to your account. Continue?`);
-    if (!confirm) return;
-
-    const timestamp = new Date().toISOString();
-    
+    // Map imported data to Supabase format with NEW IDs to avoid collisions
     const formattedData = data.map(item => ({
       user_id: user.id,
       name: item.name,
@@ -200,81 +213,119 @@ export const CRMProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       value: item.value,
       status: item.status,
       notes: item.notes,
-      created_at: item.createdAt || timestamp,
-      last_updated: item.lastUpdated || timestamp
+      // We let Supabase handle id and created_at
     }));
 
-    try {
-      const { error } = await supabase.from('leads').insert(formattedData);
-      if (error) throw error;
-      fetchLeads(); 
-      alert('Import successful!');
-    } catch (error) {
-      console.error('Import failed:', error);
-      alert('Import failed. Please check your file format.');
+    const { data: insertedData, error } = await supabase
+      .from('leads')
+      .insert(formattedData)
+      .select();
+
+    if (error) {
+      console.error('Error importing data:', error);
+      alert('Failed to import data: ' + error.message);
+      return;
+    }
+
+    if (insertedData) {
+      const mappedLeads: Lead[] = insertedData.map((item) => ({
+        id: item.id,
+        name: item.name,
+        email: item.email,
+        value: Number(item.value),
+        status: item.status,
+        notes: item.notes,
+        createdAt: item.created_at,
+        lastUpdated: item.last_updated,
+      }));
+      setLeads((prev) => [...prev, ...mappedLeads]);
+      alert(`Successfully imported ${mappedLeads.length} leads.`);
     }
   };
 
   const clearData = async () => {
-    if (!user || !supabase) return;
-    
-    const oldLeads = [...leads];
-    setLeads([]);
+     // Keeping interface implementation, though UI button might be gone
+     if(!supabase || !user) return;
+     const { error } = await supabase.from('leads').delete().eq('user_id', user.id);
+     if(error) {
+         console.error("Error clearing data", error);
+     } else {
+         setLeads([]);
+     }
+  };
 
+  const deleteAccount = async () => {
+    if (!supabase || !user) return;
+    
     try {
-      // Delete all rows for this user (RLS handles the filter usually, but adding user_id eq for safety)
-      const { error } = await supabase
+      // 1. Delete user data
+      const { error: deleteError } = await supabase
         .from('leads')
         .delete()
         .eq('user_id', user.id);
+
+      if (deleteError) throw deleteError;
+
+      // 2. Sign out
+      await signOut();
       
-      if (error) throw error;
-    } catch (error) {
-      console.error('Clear data failed:', error);
-      setLeads(oldLeads);
-      throw error; // Re-throw for caller handling
+      // Note: Actual user deletion from Auth requires Admin API or user-initiated request via Supabase Dashboard
+      // For this app, we clear their data and sign them out.
+      
+    } catch (error: any) {
+      console.error("Error deleting account:", error);
+      alert("Failed to delete account data: " + error.message);
     }
   };
 
   const signOut = async () => {
     if (!supabase) return;
     await supabase.auth.signOut();
-    setLeads([]);
     setUser(null);
+    setLeads([]);
   };
 
-  const deleteAccount = async () => {
-    if (!user || !supabase) return;
+  const updateUserProfile = async (name: string, email: string) => {
+    if (!supabase || !user) return;
 
     try {
-      // 1. Delete all user data
-      await clearData();
-
-      // 2. Sign Out
-      // Note: Actual User Deletion requires Admin API or a specific PostgreSQL function.
-      // For this client-side implementation, we wipe data and sign out.
-      await signOut();
+      const attributes: any = { data: { full_name: name } };
       
-    } catch (error) {
-      console.error('Delete account failed:', error);
-      alert('Failed to delete account data completely.');
+      if (email !== user.email) {
+        attributes.email = email;
+      }
+
+      const { data, error } = await supabase.auth.updateUser(attributes);
+
+      if (error) throw error;
+
+      if (data.user) {
+        setUser(data.user);
+        alert('Profile updated successfully!' + (attributes.email ? ' Please check your new email for a confirmation link.' : ''));
+      }
+    } catch (err: any) {
+      console.error('Error updating profile:', err);
+      alert('Failed to update profile: ' + err.message);
     }
   };
 
   return (
     <CRMContext.Provider
-      value={{ 
-        leads, 
-        user, 
-        loading, 
-        addLead, 
-        updateLead, 
-        moveLead, 
-        deleteLead, 
-        importData, 
+      value={{
+        leads,
+        user,
+        loading,
+        theme,
+        toggleTheme,
+        addLead,
+        updateLead,
+        moveLead,
+        deleteLead,
+        importData,
         clearData,
         deleteAccount,
-        signOut 
+        signOut,
+        updateUserProfile,
       }}
     >
       {children}
@@ -284,7 +335,7 @@ export const CRMProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
 export const useCRM = () => {
   const context = useContext(CRMContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useCRM must be used within a CRMProvider');
   }
   return context;

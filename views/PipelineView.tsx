@@ -12,7 +12,7 @@ import {
   useSensors,
   PointerSensor,
 } from '@dnd-kit/core';
-import { Plus, MoreHorizontal, DollarSign, Mail, AlertTriangle, MoreVertical, Download, Upload } from 'lucide-react';
+import { Plus, MoreHorizontal, DollarSign, Mail, AlertTriangle, MoreVertical, Download, Upload, Sun, Moon } from 'lucide-react';
 import LeadModal from '../components/LeadModal';
 
 // --- Confirmation Modal Component ---
@@ -29,20 +29,20 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({ isOpen, onClose, 
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden transform transition-all scale-100">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl w-full max-w-sm overflow-hidden transform transition-all scale-100">
         <div className="p-6 flex items-start gap-4">
-          <div className="p-2 bg-red-50 rounded-full shrink-0">
-            <AlertTriangle className="w-6 h-6 text-red-600" />
+          <div className="p-2 bg-red-50 dark:bg-red-900/20 rounded-full shrink-0">
+            <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-slate-900 mb-1">{title}</h3>
-            <p className="text-slate-500 text-sm">{message}</p>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-1">{title}</h3>
+            <p className="text-slate-500 dark:text-slate-400 text-sm">{message}</p>
           </div>
         </div>
-        <div className="bg-slate-50 px-6 py-4 flex justify-end gap-3 border-t border-slate-100">
+        <div className="bg-slate-50 dark:bg-slate-800 px-6 py-4 flex justify-end gap-3 border-t border-slate-100 dark:border-slate-700">
            <button
              onClick={(e) => { e.stopPropagation(); onClose(); }}
-             className="px-4 py-2 text-slate-600 text-sm font-medium hover:bg-slate-100 rounded-lg transition-colors"
+             className="px-4 py-2 text-slate-600 dark:text-slate-300 text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
            >
              Cancel
            </button>
@@ -99,29 +99,29 @@ const LeadCard: React.FC<{ lead: Lead; isOverlay?: boolean }> = ({ lead, isOverl
         style={style}
         {...attributes}
         {...listeners}
-        className={`bg-white p-4 rounded-xl shadow-sm border border-slate-200 group hover:shadow-md transition-shadow cursor-grab relative ${isOverlay ? 'rotate-3 scale-105 cursor-grabbing z-50' : ''}`}
+        className={`bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 group hover:shadow-md transition-all cursor-grab relative ${isOverlay ? 'rotate-3 scale-105 cursor-grabbing z-50' : ''}`}
       >
         <div className="flex justify-between items-start mb-2">
-          <h4 className="font-semibold text-slate-800 text-sm line-clamp-1">{lead.name}</h4>
+          <h4 className="font-semibold text-slate-800 dark:text-slate-100 text-sm line-clamp-1">{lead.name}</h4>
           <button 
             onPointerDown={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }} // Use onPointerDown to prevent drag start
-            className="text-slate-400 hover:text-slate-600 p-1 -mr-2 rounded-md hover:bg-slate-100"
+            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 -mr-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700"
           >
             <MoreHorizontal className="w-4 h-4" />
           </button>
           
           {/* Simple Dropdown Menu */}
           {showMenu && (
-            <div className="absolute right-2 top-8 bg-white border border-slate-200 shadow-lg rounded-lg z-20 w-24 py-1 text-xs overflow-hidden flex flex-col">
+            <div className="absolute right-2 top-8 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-lg rounded-lg z-20 w-24 py-1 text-xs overflow-hidden flex flex-col">
                <button 
                 onClick={(e) => { e.stopPropagation(); handleEdit(); }}
-                className="px-3 py-2 text-left hover:bg-slate-50 text-slate-700 w-full"
+                className="px-3 py-2 text-left hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 w-full"
                >
                    Edit
                </button>
                <button 
                 onClick={(e) => { e.stopPropagation(); handleDeleteClick(); }}
-                className="px-3 py-2 text-left hover:bg-red-50 text-red-600 w-full"
+                className="px-3 py-2 text-left hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 w-full"
                >
                    Delete
                </button>
@@ -130,17 +130,17 @@ const LeadCard: React.FC<{ lead: Lead; isOverlay?: boolean }> = ({ lead, isOverl
         </div>
 
         <div className="space-y-2">
-            <div className="flex items-center text-slate-500 text-xs">
-                <DollarSign className="w-3 h-3 mr-1.5 text-emerald-600" />
-                <span className="font-medium text-slate-700">${lead.value.toLocaleString()}</span>
+            <div className="flex items-center text-slate-500 dark:text-slate-400 text-xs">
+                <DollarSign className="w-3 h-3 mr-1.5 text-emerald-600 dark:text-emerald-400" />
+                <span className="font-medium text-slate-700 dark:text-slate-200">${lead.value.toLocaleString()}</span>
             </div>
-            <div className="flex items-center text-slate-400 text-xs">
+            <div className="flex items-center text-slate-400 dark:text-slate-500 text-xs">
                 <Mail className="w-3 h-3 mr-1.5" />
                 <span className="truncate max-w-[140px]">{lead.email || 'No email'}</span>
             </div>
             {lead.notes && (
-                <div className="pt-2 mt-2 border-t border-slate-100">
-                    <p className="text-xs text-slate-500 line-clamp-2 italic">"{lead.notes}"</p>
+                <div className="pt-2 mt-2 border-t border-slate-100 dark:border-slate-700">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 italic">"{lead.notes}"</p>
                 </div>
             )}
         </div>
@@ -178,14 +178,14 @@ const KanbanColumn: React.FC<{ column: typeof COLUMNS[0]; leads: Lead[] }> = ({ 
 
   return (
     <div ref={setNodeRef} className="flex flex-col h-full min-w-[280px] w-full md:w-[280px] lg:w-[320px] flex-shrink-0">
-      <div className={`p-4 rounded-t-xl bg-white border-b-4 ${column.color} shadow-sm mb-4`}>
+      <div className={`p-4 rounded-t-xl bg-white dark:bg-slate-900 border-b-4 ${column.color} shadow-sm mb-4 transition-colors`}>
         <div className="flex items-center justify-between mb-2">
-          <h3 className="font-bold text-slate-800">{column.title}</h3>
-          <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${column.badgeColor}`}>
+          <h3 className="font-bold text-slate-800 dark:text-slate-100">{column.title}</h3>
+          <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${column.badgeColor} ${column.darkBadgeColor}`}>
             {leads.length}
           </span>
         </div>
-        <p className="text-xs text-slate-500 font-medium">
+        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
            Total: ${totalValue.toLocaleString()}
         </p>
       </div>
@@ -195,7 +195,7 @@ const KanbanColumn: React.FC<{ column: typeof COLUMNS[0]; leads: Lead[] }> = ({ 
           <LeadCard key={lead.id} lead={lead} />
         ))}
         {leads.length === 0 && (
-          <div className="h-24 border-2 border-dashed border-slate-200 rounded-xl flex items-center justify-center text-slate-400 text-sm">
+          <div className="h-24 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl flex items-center justify-center text-slate-400 dark:text-slate-600 text-sm">
             Drop here
           </div>
         )}
@@ -206,7 +206,7 @@ const KanbanColumn: React.FC<{ column: typeof COLUMNS[0]; leads: Lead[] }> = ({ 
 
 // --- Main View ---
 const PipelineView: React.FC = () => {
-  const { leads, moveLead, addLead, importData } = useCRM();
+  const { leads, moveLead, addLead, importData, theme, toggleTheme } = useCRM();
   const [activeLead, setActiveLead] = useState<Lead | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   
@@ -282,25 +282,34 @@ const PipelineView: React.FC = () => {
   };
 
   return (
-    <div className="h-full flex flex-col overflow-hidden bg-slate-50/50">
+    <div className="h-full flex flex-col overflow-hidden bg-slate-50/50 dark:bg-slate-950 transition-colors">
       {/* Header */}
-      <div className="px-6 py-4 bg-white border-b border-slate-200 flex justify-between items-center sticky top-0 z-20">
-        <h1 className="text-2xl font-bold text-slate-900">Pipeline</h1>
+      <div className="px-6 py-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center sticky top-0 z-20 transition-colors">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Pipeline</h1>
         
         <div className="flex items-center gap-2">
             <button
-            onClick={() => setIsAddModalOpen(true)}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium flex items-center shadow-sm shadow-indigo-200 transition-all active:scale-95"
+              onClick={() => setIsAddModalOpen(true)}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium flex items-center shadow-sm shadow-indigo-200 dark:shadow-none transition-all active:scale-95"
             >
-            <Plus className="w-5 h-5 mr-2" />
-            Add
+              <Plus className="w-5 h-5 mr-2" />
+              Add
+            </button>
+
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200 rounded-lg transition-colors"
+              title={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
+            >
+              {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
             </button>
 
              {/* Menu Button */}
              <div className="relative">
                 <button
                     onClick={() => setShowHeaderMenu(!showHeaderMenu)}
-                    className="p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700 rounded-lg transition-colors"
+                    className="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200 rounded-lg transition-colors"
                 >
                     <MoreVertical className="w-5 h-5" />
                 </button>
@@ -308,19 +317,19 @@ const PipelineView: React.FC = () => {
                 {showHeaderMenu && (
                     <>
                         <div className="fixed inset-0 z-20" onClick={() => setShowHeaderMenu(false)} />
-                        <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 py-1 z-30 animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
+                        <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 py-1 z-30 animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
                             <button 
                                 onClick={handleImportClick}
-                                className="w-full px-4 py-2.5 text-left text-sm text-slate-700 hover:bg-slate-50 flex items-center transition-colors"
+                                className="w-full px-4 py-2.5 text-left text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center transition-colors"
                             >
-                                <Upload className="w-4 h-4 mr-3 text-slate-400" />
+                                <Upload className="w-4 h-4 mr-3 text-slate-400 dark:text-slate-500" />
                                 Import JSON
                             </button>
                             <button 
                                 onClick={handleExport}
-                                className="w-full px-4 py-2.5 text-left text-sm text-slate-700 hover:bg-slate-50 flex items-center transition-colors"
+                                className="w-full px-4 py-2.5 text-left text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center transition-colors"
                             >
-                                <Download className="w-4 h-4 mr-3 text-slate-400" />
+                                <Download className="w-4 h-4 mr-3 text-slate-400 dark:text-slate-500" />
                                 Download JSON
                             </button>
                         </div>

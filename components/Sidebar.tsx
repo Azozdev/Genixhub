@@ -19,12 +19,12 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setView }) => {
   const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
 
   return (
-    <aside className="w-20 lg:w-64 bg-white border-r border-slate-200 flex flex-col h-full fixed left-0 top-0 z-30 transition-all duration-300">
-      <div className="h-16 flex items-center justify-center lg:justify-start lg:px-6 border-b border-slate-100">
+    <aside className="w-20 lg:w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col h-full fixed left-0 top-0 z-30 transition-all duration-300">
+      <div className="h-16 flex items-center justify-center lg:justify-start lg:px-6 border-b border-slate-100 dark:border-slate-800">
         <div className="bg-indigo-600 p-1.5 rounded-lg mr-0 lg:mr-3">
           <Briefcase className="w-6 h-6 text-white" />
         </div>
-        <span className="font-bold text-xl text-slate-800 hidden lg:block">GenixHub</span>
+        <span className="font-bold text-xl text-slate-800 dark:text-slate-100 hidden lg:block">GenixHub</span>
       </div>
 
       <nav className="flex-1 py-6 space-y-2 px-2 lg:px-4">
@@ -36,16 +36,16 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setView }) => {
               onClick={() => setView(item.id)}
               className={`w-full flex items-center justify-center lg:justify-start p-3 rounded-xl transition-all duration-200 group ${
                 isActive
-                  ? 'bg-indigo-50 text-indigo-600'
-                  : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+                  ? 'bg-indigo-50 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400'
+                  : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200'
               }`}
             >
               <item.icon
                 className={`w-6 h-6 lg:w-5 lg:h-5 lg:mr-3 ${
-                  isActive ? 'text-indigo-600' : 'text-slate-400 group-hover:text-slate-600'
+                  isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300'
                 }`}
               />
-              <span className={`font-medium hidden lg:block ${isActive ? 'text-indigo-700' : ''}`}>
+              <span className={`font-medium hidden lg:block ${isActive ? 'text-indigo-700 dark:text-indigo-300' : ''}`}>
                 {item.label}
               </span>
             </button>
@@ -53,13 +53,13 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setView }) => {
         })}
       </nav>
 
-      <div className="p-4 border-t border-slate-100 hidden lg:block">
-        <div className="bg-slate-50 rounded-lg p-4">
-          <p className="text-xs font-semibold text-slate-500 uppercase mb-1">Signed in as</p>
-          <p className="text-sm font-bold text-slate-800 truncate" title={user?.user_metadata?.full_name}>
+      <div className="p-4 border-t border-slate-100 dark:border-slate-800 hidden lg:block">
+        <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-4">
+          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-1">Signed in as</p>
+          <p className="text-sm font-bold text-slate-800 dark:text-slate-200 truncate" title={user?.user_metadata?.full_name}>
             {displayName}
           </p>
-          <p className="text-xs text-slate-500 truncate" title={user?.email}>
+          <p className="text-xs text-slate-500 dark:text-slate-400 truncate" title={user?.email}>
             {user?.email}
           </p>
         </div>
