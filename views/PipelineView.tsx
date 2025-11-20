@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useCRM } from '../context/CRMContext';
 import { COLUMNS, Lead, LeadStatus } from '../types';
 import {
@@ -12,7 +12,7 @@ import {
   useSensors,
   PointerSensor,
 } from '@dnd-kit/core';
-import { Plus, MoreHorizontal, Calendar, DollarSign, Mail, AlertTriangle } from 'lucide-react';
+import { Plus, MoreHorizontal, DollarSign, Mail, AlertTriangle, MoreVertical, Download, Upload } from 'lucide-react';
 import LeadModal from '../components/LeadModal';
 
 // --- Confirmation Modal Component ---
@@ -206,9 +206,13 @@ const KanbanColumn: React.FC<{ column: typeof COLUMNS[0]; leads: Lead[] }> = ({ 
 
 // --- Main View ---
 const PipelineView: React.FC = () => {
-  const { leads, moveLead, addLead } = useCRM();
+  const { leads, moveLead, addLead, importData } = useCRM();
   const [activeLead, setActiveLead] = useState<Lead | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  
+  // Header menu state
+  const [showHeaderMenu, setShowHeaderMenu] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Sensors for drag detection logic
   const sensors = useSensors(
@@ -241,18 +245,97 @@ const PipelineView: React.FC = () => {
     }
   };
 
+  const handleExport = () => {
+    const dataStr = JSON.stringify(leads, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `genixhub-backup-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    setShowHeaderMenu(false);
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+    setShowHeaderMenu(false);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const json = JSON.parse(event.target?.result as string);
+        importData(json);
+      } catch (err) {
+        alert('Failed to parse JSON file.');
+      }
+    };
+    reader.readAsText(file);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
   return (
     <div className="h-full flex flex-col overflow-hidden bg-slate-50/50">
       {/* Header */}
       <div className="px-6 py-4 bg-white border-b border-slate-200 flex justify-between items-center sticky top-0 z-20">
         <h1 className="text-2xl font-bold text-slate-900">Pipeline</h1>
-        <button
-          onClick={() => setIsAddModalOpen(true)}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium flex items-center shadow-sm shadow-indigo-200 transition-all active:scale-95"
-        >
-          <Plus className="w-5 h-5 mr-2" />
-          Add Lead
-        </button>
+        
+        <div className="flex items-center gap-2">
+            <button
+            onClick={() => setIsAddModalOpen(true)}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium flex items-center shadow-sm shadow-indigo-200 transition-all active:scale-95"
+            >
+            <Plus className="w-5 h-5 mr-2" />
+            Add
+            </button>
+
+             {/* Menu Button */}
+             <div className="relative">
+                <button
+                    onClick={() => setShowHeaderMenu(!showHeaderMenu)}
+                    className="p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700 rounded-lg transition-colors"
+                >
+                    <MoreVertical className="w-5 h-5" />
+                </button>
+
+                {showHeaderMenu && (
+                    <>
+                        <div className="fixed inset-0 z-20" onClick={() => setShowHeaderMenu(false)} />
+                        <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 py-1 z-30 animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
+                            <button 
+                                onClick={handleImportClick}
+                                className="w-full px-4 py-2.5 text-left text-sm text-slate-700 hover:bg-slate-50 flex items-center transition-colors"
+                            >
+                                <Upload className="w-4 h-4 mr-3 text-slate-400" />
+                                Import JSON
+                            </button>
+                            <button 
+                                onClick={handleExport}
+                                className="w-full px-4 py-2.5 text-left text-sm text-slate-700 hover:bg-slate-50 flex items-center transition-colors"
+                            >
+                                <Download className="w-4 h-4 mr-3 text-slate-400" />
+                                Download JSON
+                            </button>
+                        </div>
+                    </>
+                )}
+             </div>
+        </div>
+
+        <input
+            type="file"
+            accept=".json"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            className="hidden"
+        />
       </div>
 
       {/* Kanban Board */}
