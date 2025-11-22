@@ -1,8 +1,13 @@
+
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { Briefcase, Loader2, AlertCircle, User } from 'lucide-react';
+import { Briefcase, Loader2, AlertCircle, User, ArrowLeft } from 'lucide-react';
 
-const AuthView: React.FC = () => {
+interface AuthViewProps {
+  onBack?: () => void;
+}
+
+const AuthView: React.FC<AuthViewProps> = ({ onBack }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -64,6 +69,17 @@ const AuthView: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-4 transition-colors">
       <div className="w-full max-w-md">
+        {/* Back Button */}
+        {onBack && (
+          <button 
+            onClick={onBack}
+            className="mb-6 flex items-center text-slate-500 hover:text-indigo-600 transition-colors text-sm font-medium"
+          >
+            <ArrowLeft className="w-4 h-4 mr-1" />
+            Back to Home
+          </button>
+        )}
+
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-600 text-white mb-4 shadow-lg shadow-indigo-200 dark:shadow-none">
             <Briefcase className="w-6 h-6" />

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { CRMProvider, useCRM } from './context/CRMContext';
 import Sidebar from './components/Sidebar';
@@ -5,11 +6,13 @@ import PipelineView from './views/PipelineView';
 import AnalyticsView from './views/AnalyticsView';
 import SettingsView from './views/SettingsView';
 import AuthView from './views/AuthView';
+import LandingPage from './views/LandingPage';
 import { Loader2 } from 'lucide-react';
 
 const AppContent: React.FC = () => {
   const { user, loading } = useCRM();
   const [currentView, setCurrentView] = useState('pipeline');
+  const [showAuth, setShowAuth] = useState(false);
 
   if (loading) {
     return (
@@ -19,10 +22,15 @@ const AppContent: React.FC = () => {
     );
   }
 
+  // Unauthenticated State: Landing Page or Auth View
   if (!user) {
-    return <AuthView />;
+    if (showAuth) {
+      return <AuthView onBack={() => setShowAuth(false)} />;
+    }
+    return <LandingPage onLogin={() => setShowAuth(true)} />;
   }
 
+  // Authenticated State: Main App
   const renderView = () => {
     switch (currentView) {
       case 'pipeline':
