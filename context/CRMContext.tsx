@@ -127,7 +127,7 @@ export const CRMProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const updateLead = async (id: string, updates: Partial<Lead>) => {
     if (!supabase) return;
 
-    // Prepare payload for Supabase (mapping back to snake_case columns if needed, though basic fields match)
+    // Prepare payload for Supabase
     const payload: any = { ...updates };
     delete payload.id;
     delete payload.createdAt;
@@ -178,7 +178,6 @@ export const CRMProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
     if (error) {
       console.error('Error moving lead:', error);
-      // Revert if failed
       const { data } = await supabase.from('leads').select('status').eq('id', id).single();
       if (data) {
          setLeads((prev) =>
@@ -205,7 +204,6 @@ export const CRMProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const importData = async (data: Lead[]) => {
     if (!user || !supabase) return;
 
-    // Map imported data to Supabase format with NEW IDs to avoid collisions
     const formattedData = data.map(item => ({
       user_id: user.id,
       name: item.name,
@@ -213,7 +211,6 @@ export const CRMProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       value: item.value,
       status: item.status,
       notes: item.notes,
-      // We let Supabase handle id and created_at
     }));
 
     const { data: insertedData, error } = await supabase
@@ -244,7 +241,6 @@ export const CRMProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const clearData = async () => {
-     // Keeping interface implementation, though UI button might be gone
      if(!supabase || !user) return;
      const { error } = await supabase.from('leads').delete().eq('user_id', user.id);
      if(error) {
@@ -258,20 +254,13 @@ export const CRMProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     if (!supabase || !user) return;
     
     try {
-      // 1. Delete user data
       const { error: deleteError } = await supabase
         .from('leads')
         .delete()
         .eq('user_id', user.id);
 
       if (deleteError) throw deleteError;
-
-      // 2. Sign out
       await signOut();
-      
-      // Note: Actual user deletion from Auth requires Admin API or user-initiated request via Supabase Dashboard
-      // For this app, we clear their data and sign them out.
-      
     } catch (error: any) {
       console.error("Error deleting account:", error);
       alert("Failed to delete account data: " + error.message);
@@ -290,15 +279,11 @@ export const CRMProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
     try {
       const attributes: any = { data: { full_name: name } };
-      
       if (email !== user.email) {
         attributes.email = email;
       }
-
       const { data, error } = await supabase.auth.updateUser(attributes);
-
       if (error) throw error;
-
       if (data.user) {
         setUser(data.user);
         alert('Profile updated successfully!' + (attributes.email ? ' Please check your new email for a confirmation link.' : ''));
@@ -306,6 +291,19 @@ export const CRMProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     } catch (err: any) {
       console.error('Error updating profile:', err);
       alert('Failed to update profile: ' + err.message);
+    }
+  };
+
+  const updateSubscription = async () => {
+    if (!supabase || !user) return;
+    try {
+      const { data, error } = await supabase.auth.updateUser({
+        data: { subscription_active: true }
+      });
+      if (error) throw error;
+      if (data.user) setUser(data.user);
+    } catch (err: any) {
+      console.error('Error updating subscription:', err);
     }
   };
 
@@ -326,6 +324,7 @@ export const CRMProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         deleteAccount,
         signOut,
         updateUserProfile,
+        updateSubscription,
       }}
     >
       {children}

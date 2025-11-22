@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Briefcase, Check, ArrowRight, LayoutDashboard, BarChart3, Shield, Zap, Sun, Moon } from 'lucide-react';
+import { Briefcase, ArrowRight } from 'lucide-react';
 
 interface LandingPageProps {
   onLogin: () => void;
@@ -18,9 +17,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
                 <Briefcase className="w-5 h-5 text-white" />
               </div>
               <span className="font-bold text-xl text-slate-900">GenixHub</span>
-            </div>
-            <div className="hidden md:flex items-center space-x-8">
-              <a href="#features" className="text-slate-600 hover:text-indigo-600 transition-colors font-medium">Features</a>
             </div>
             <div className="flex items-center gap-4">
               <button 
@@ -41,7 +37,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 lg:pt-48 lg:pb-32 px-4 overflow-hidden relative">
+      <section className="pt-32 pb-20 lg:pt-48 lg:pb-32 px-4 overflow-hidden relative min-h-screen flex flex-col justify-center">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-indigo-400/20 blur-[120px] rounded-full -z-10" />
         
         <div className="max-w-7xl mx-auto text-center">
@@ -103,65 +99,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
                  </div>
                </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section id="features" className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-indigo-600 font-bold tracking-wide uppercase text-sm mb-3">Key Features</h2>
-            <h3 className="text-3xl md:text-4xl font-bold text-slate-900">Everything you need to scale</h3>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              {
-                icon: <LayoutDashboard className="w-6 h-6 text-white" />,
-                color: "bg-blue-500",
-                title: "Kanban Pipeline",
-                desc: "Visualize your sales process. Drag and drop leads from 'Contacted' to 'Won' with zero friction."
-              },
-              {
-                icon: <BarChart3 className="w-6 h-6 text-white" />,
-                color: "bg-emerald-500",
-                title: "Smart Analytics",
-                desc: "Real-time insights into your revenue, conversion rates, and pipeline value."
-              },
-              {
-                icon: <Shield className="w-6 h-6 text-white" />,
-                color: "bg-violet-500",
-                title: "Secure Cloud Sync",
-                desc: "Your data is encrypted and synced instantly via Supabase. Access it from any device."
-              },
-              {
-                icon: <Sun className="w-6 h-6 text-white" />,
-                color: "bg-amber-500",
-                title: "Light & Dark Mode",
-                desc: "Work comfortably in any lighting condition with our fully supported themes."
-              },
-              {
-                icon: <Zap className="w-6 h-6 text-white" />,
-                color: "bg-rose-500",
-                title: "Instant Setup",
-                desc: "No complex onboarding. Sign up and start managing leads in less than 30 seconds."
-              },
-              {
-                icon: <Check className="w-6 h-6 text-white" />,
-                color: "bg-indigo-500",
-                title: "Data Export",
-                desc: "Your data belongs to you. Export your entire lead database to JSON anytime."
-              }
-            ].map((feature, idx) => (
-              <div key={idx} className="p-6 rounded-2xl border border-slate-100 bg-slate-50 hover:bg-white hover:shadow-xl hover:border-slate-200 transition-all duration-300 group">
-                <div className={`w-12 h-12 ${feature.color} rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
-                  {feature.icon}
-                </div>
-                <h4 className="text-xl font-bold text-slate-900 mb-3">{feature.title}</h4>
-                <p className="text-slate-600 leading-relaxed">{feature.desc}</p>
-              </div>
-            ))}
           </div>
         </div>
       </section>

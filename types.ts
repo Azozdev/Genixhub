@@ -28,6 +28,7 @@ export interface CRMState {
   deleteAccount: () => Promise<void>;
   signOut: () => Promise<void>;
   updateUserProfile: (name: string, email: string) => Promise<void>;
+  updateSubscription: () => Promise<void>;
 }
 
 export const COLUMNS: { id: LeadStatus; title: string; color: string; badgeColor: string; darkBadgeColor: string }[] = [

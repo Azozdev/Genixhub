@@ -16,7 +16,8 @@
     "canvas-confetti": "^1.9.4",
     "uuid": "^13.0.0",
     "lucide-react": "^0.554.0",
-    "@supabase/supabase-js": "^2.45.4"
+    "@supabase/supabase-js": "^2.45.4",
+    "@whop/react-checkout": "0.2.5"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

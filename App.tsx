@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { CRMProvider, useCRM } from './context/CRMContext';
 import Sidebar from './components/Sidebar';
 import PipelineView from './views/PipelineView';
@@ -8,6 +7,9 @@ import SettingsView from './views/SettingsView';
 import AuthView from './views/AuthView';
 import LandingPage from './views/LandingPage';
 import { Loader2 } from 'lucide-react';
+
+// Lazy load SubscriptionView to prevent crashes if the library fails to load initially
+const SubscriptionView = React.lazy(() => import('./views/SubscriptionView'));
 
 const AppContent: React.FC = () => {
   const { user, loading } = useCRM();
@@ -30,7 +32,17 @@ const AppContent: React.FC = () => {
     return <LandingPage onLogin={() => setShowAuth(true)} />;
   }
 
-  // Authenticated State: Main App
+  // Subscription Check
+  // @ts-ignore - Supabase types might not infer custom metadata immediately
+  if (!user.user_metadata?.subscription_active) {
+    return (
+      <Suspense fallback={<div className="h-screen w-full flex items-center justify-center"><Loader2 className="w-8 h-8 text-indigo-600 animate-spin" /></div>}>
+        <SubscriptionView />
+      </Suspense>
+    );
+  }
+
+  // Authenticated & Subscribed State: Main App
   const renderView = () => {
     switch (currentView) {
       case 'pipeline':
@@ -58,7 +70,9 @@ const AppContent: React.FC = () => {
 const App: React.FC = () => {
   return (
     <CRMProvider>
-      <AppContent />
+      <Suspense fallback={<div className="h-screen w-full flex items-center justify-center"><Loader2 className="w-8 h-8 text-indigo-600 animate-spin" /></div>}>
+        <AppContent />
+      </Suspense>
     </CRMProvider>
   );
 };
