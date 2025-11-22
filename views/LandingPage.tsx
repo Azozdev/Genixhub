@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Briefcase, Check, ArrowRight, LayoutDashboard, BarChart3, Shield, Zap, Sun, Moon } from 'lucide-react';
 
 interface LandingPageProps {
@@ -7,12 +7,6 @@ interface LandingPageProps {
 }
 
 const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
-  const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
-
-  const toggleBilling = () => {
-    setBillingCycle(prev => prev === 'monthly' ? 'annual' : 'monthly');
-  };
-
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-indigo-100 selection:text-indigo-700">
       {/* Navbar */}
@@ -27,7 +21,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
             </div>
             <div className="hidden md:flex items-center space-x-8">
               <a href="#features" className="text-slate-600 hover:text-indigo-600 transition-colors font-medium">Features</a>
-              <a href="#pricing" className="text-slate-600 hover:text-indigo-600 transition-colors font-medium">Pricing</a>
             </div>
             <div className="flex items-center gap-4">
               <button 
@@ -73,12 +66,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
             >
               Start for Free <ArrowRight className="w-5 h-5" />
             </button>
-            <a 
-              href="#pricing"
-              className="w-full sm:w-auto px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-full font-bold text-lg hover:bg-slate-50 transition-all hover:border-slate-300"
-            >
-              View Pricing
-            </a>
           </div>
 
           {/* Dashboard Preview Mockup */}
@@ -175,103 +162,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
                 <p className="text-slate-600 leading-relaxed">{feature.desc}</p>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing Section */}
-      <section id="pricing" className="py-24 bg-slate-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Simple, Transparent Pricing</h2>
-            <p className="text-lg text-slate-600">Choose the plan that fits your business stage.</p>
-            
-            {/* Billing Toggle */}
-            <div className="mt-8 flex justify-center items-center gap-4">
-                <span className={`text-sm font-medium ${billingCycle === 'monthly' ? 'text-slate-900' : 'text-slate-500'}`}>Monthly</span>
-                <button 
-                    onClick={toggleBilling}
-                    className="w-16 h-8 bg-slate-200 rounded-full p-1 relative transition-colors duration-300 focus:outline-none"
-                >
-                    <div className={`w-6 h-6 bg-indigo-600 rounded-full shadow-md transform transition-transform duration-300 ${billingCycle === 'annual' ? 'translate-x-8' : ''}`} />
-                </button>
-                <span className={`text-sm font-medium ${billingCycle === 'annual' ? 'text-slate-900' : 'text-slate-500'}`}>
-                    Annually <span className="text-emerald-600 text-xs font-bold bg-emerald-100 px-2 py-0.5 rounded-full ml-1">SAVE BIG</span>
-                </span>
-            </div>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {/* Starter Plan */}
-            <div className="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden relative hover:-translate-y-2 transition-transform duration-300">
-              {billingCycle === 'annual' && (
-                   <div className="absolute top-0 right-0 bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-bl-xl">
-                       LIMITED DISCOUNT
-                   </div>
-              )}
-              <div className="p-8">
-                <h3 className="text-2xl font-bold text-slate-900 mb-2">Starter</h3>
-                <p className="text-slate-500 mb-6">Perfect for freelancers just starting out.</p>
-                <div className="flex items-baseline mb-6">
-                  <span className="text-5xl font-extrabold text-slate-900">
-                    ${billingCycle === 'monthly' ? '19' : '50'}
-                  </span>
-                  <span className="text-slate-500 ml-2">/{billingCycle === 'monthly' ? 'mo' : 'year'}</span>
-                </div>
-                <ul className="space-y-4 mb-8">
-                  {['Unlimited Leads', 'Kanban Board', 'Basic Analytics', 'Email Support'].map((item, i) => (
-                    <li key={i} className="flex items-center text-slate-600">
-                      <Check className="w-5 h-5 text-indigo-500 mr-3" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-                <button 
-                    onClick={onLogin}
-                    className="w-full py-3 px-6 rounded-xl bg-slate-100 text-slate-900 font-bold hover:bg-slate-200 transition-colors"
-                >
-                    Get Started
-                </button>
-              </div>
-            </div>
-
-            {/* Pro Plan */}
-            <div className="bg-slate-900 rounded-3xl shadow-2xl border border-slate-800 overflow-hidden relative hover:-translate-y-2 transition-transform duration-300">
-              <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-indigo-500 to-violet-500"></div>
-              <div className="p-8">
-                <div className="flex justify-between items-center mb-2">
-                   <h3 className="text-2xl font-bold text-white">Pro</h3>
-                   <span className="bg-indigo-600 text-white text-xs font-bold px-2 py-1 rounded uppercase tracking-wide">Popular</span>
-                </div>
-                <p className="text-slate-400 mb-6">For serious freelancers scaling up.</p>
-                <div className="flex items-baseline mb-6">
-                  <span className="text-5xl font-extrabold text-white">
-                    ${billingCycle === 'monthly' ? '35' : '90'}
-                  </span>
-                  <span className="text-slate-400 ml-2">/{billingCycle === 'monthly' ? 'mo' : 'year'}</span>
-                </div>
-                <ul className="space-y-4 mb-8">
-                  {['Everything in Starter', 'Advanced Analytics', 'Priority Support', 'Data Export', 'Custom Tags'].map((item, i) => (
-                    <li key={i} className="flex items-center text-slate-300">
-                      <div className="bg-indigo-500/20 p-1 rounded-full mr-3">
-                        <Check className="w-4 h-4 text-indigo-400" />
-                      </div>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-                <button 
-                    onClick={onLogin}
-                    className="w-full py-3 px-6 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-900/20"
-                >
-                    Start Free Trial
-                </button>
-              </div>
-            </div>
-          </div>
-          
-          <div className="text-center mt-8 text-slate-500 text-sm">
-            No credit card required for the 14-day trial.
           </div>
         </div>
       </section>
